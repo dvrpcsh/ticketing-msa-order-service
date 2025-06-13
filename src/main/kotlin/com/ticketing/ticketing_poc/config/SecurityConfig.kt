@@ -29,7 +29,8 @@ class SecurityConfig {
         val publicUrls = arrayOf(
             "/api/users/signup",        //회원가입 API
             "/swagger-ui/**",           //Swagger UI페이지
-            "/v3/api-docs/**"           //Swagger API문서
+            "/v3/api-docs/**",          //Swagger API문서
+            "/api/products"             //상품 목록 조회 API는 모두에게 허용
         )
 
         /**
