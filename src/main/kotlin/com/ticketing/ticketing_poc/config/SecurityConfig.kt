@@ -30,7 +30,8 @@ class SecurityConfig {
             "/api/users/signup",        //회원가입 API
             "/swagger-ui/**",           //Swagger UI페이지
             "/v3/api-docs/**",          //Swagger API문서
-            "/api/products"             //상품 목록 조회 API는 모두에게 허용
+            "/api/products",            //상품 목록 조회 API는 모두에게 허용
+            "/api/orders"               //주문 생성 API, 추후 인증된 사용자만 접근하도록 수정해야함
         )
 
         /**
