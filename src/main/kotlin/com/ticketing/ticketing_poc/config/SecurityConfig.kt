@@ -6,49 +6,77 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 /**
- * Spring Security 관련 설정을 정의하는 클래스
- * -비밀번호 암호화에 사용할 PasswordEencoder Bean을 등록
- * -웹 페이지 및 API에 대한 접근 제어 규칙(인가 설정)을 구성
+ * 역할: Spring Security 관련 설정을 정의하는 클래스입니다.
  */
 @Configuration
 class SecurityConfig {
 
-    //비밀번호 암호화를 위한 PasswordEncoder를 Bean으로 등록
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
 
-    //인증/인가(Authentication/Authorization)관련 설정을 위한 SecurityFilterChain을 Bean으로 등록
+    /**
+     * 역할: HTTP 요청에 대한 보안 규칙(인증/인가)을 설정합니다.
+     */
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
-        //공개적으로 접근을 허용할 URL 목록을 정의합니다.
+        // 공개적으로 접근을 허용할 URL 목록을 정의합니다.
         val publicUrls = arrayOf(
-            "/api/users/signup",        //회원가입 API
-            "/swagger-ui/**",           //Swagger UI페이지
-            "/v3/api-docs/**",          //Swagger API문서
-            "/api/products",            //상품 목록 조회 API는 모두에게 허용
-            "/api/orders"               //주문 생성 API, 추후 인증된 사용자만 접근하도록 수정해야함
+            "/api/users/signup",
+            "/api/products",
+            "/api/orders",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
         )
 
         /**
-         * 1.CSRF(Cross-Site Request Forgery)보호 기능을 비활성화합니다.(REST API에서는 세션을 사용하지 않으므로 불필요)
-         * 2.HTTP요청에 대한 인가(Authorization)규칙을 설정합니다.
-         * 3.publicUrls에 포함된 경로는 인증 없이 누구나 접근할 수 있도록 허용합니다.
-         * 4.그 이외 모든 요청은 반드시 인증을 거쳐야 접근할 수 있도록 설정합니다.
+         * 흐름:
+         * 1. CORS 설정을 적용합니다. (가장 중요!)
+         * 2. 사용하지 않는 기본 보안 기능(CSRF, HTTP Basic, Form Login)을 비활성화합니다.
+         * 3. publicUrls에 등록된 경로는 인증 없이 모두 접근을 허용합니다.
+         * 4. 그 외의 모든 요청은 반드시 인증을 거쳐야만 접근할 수 있도록 설정합니다.
          */
         http
-            .csrf {it.disable()}
-            .httpBasic {it.disable()}
-            .formLogin{it.disable()}
-            .authorizeHttpRequests{
-                it.requestMatchers(*publicUrls).permitAll()
+            .cors { it.configurationSource(corsConfigurationSource()) } // 1. CORS 설정 적용
+            .csrf { it.disable() }
+            .httpBasic { it.disable() }
+            .formLogin { it.disable() }
+            .authorizeHttpRequests {
+                it.requestMatchers(*publicUrls).permitAll() // 3. 공개 URL 허용
                     .anyRequest().authenticated()
             }
 
         return http.build()
+    }
+
+    /**
+     * 2025-06-15 UserService분리로 인한 주석처리
+     * 역할: [신규 추가] CORS(Cross-Origin Resource Sharing) 관련 설정을 정의합니다.
+     * 흐름:
+     * 1. 우리 서버로 들어오는 모든 경로()에 대해 CORS 정책을 적용합니다.
+     * 2. http://localhost:8000 (API 게이트웨이)からの 요청을 허용합니다.
+     * 3. 허용할 HTTP 메서드(GET, POST 등)를 지정합니다.
+     * 4. 모든 요청 헤더를 허용합니다.
+     */
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf("http://localhost:8000") // 게이트웨이 주소
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        configuration.addAllowedHeader("*")
+        configuration.allowCredentials = true
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration) // 모든 경로에 대해 위 설정을 적용
+
+        return source
     }
 }
