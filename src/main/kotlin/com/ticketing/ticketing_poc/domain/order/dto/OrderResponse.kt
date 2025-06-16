@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 @Schema(description = "주문 정보 응답 데이터 모델")
 data class OrderResponse(
     val orderId: Long,
-    val userEmail: String,
+    val userId: Long,
     val productTitle: String,
     val orderStatus: OrderStatus,
     val orderedAt: LocalDateTime
@@ -20,7 +20,7 @@ data class OrderResponse(
         fun from(order: Order): OrderResponse {
             return OrderResponse(
                 orderId = order.id!!,
-                userEmail = order.user.email,
+                userId = order.userId,
                 productTitle = order.product.title,
                 orderStatus = order.status,
                 orderedAt = order.createdAt

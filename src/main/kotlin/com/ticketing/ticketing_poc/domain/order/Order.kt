@@ -1,39 +1,34 @@
 package com.ticketing.ticketing_poc.domain.order
 
-import com.fasterxml.jackson.databind.ser.Serializers.Base
 import com.ticketing.ticketing_poc.domain.common.BaseEntity
 import com.ticketing.ticketing_poc.domain.product.Product
-import com.ticketing.ticketing_poc.domain.user.User
 import jakarta.persistence.*
 
 /**
- * 사용자의 상품 예매 정보를 나타내는 Entity
- * User, Product와 다대일(N:1) 관계를 맺습니다.
+ * 역할: 사용자의 상품 예매 정보를 나타내는 Entity
+ * 흐름:
+ * 1. 다른 마이크로서비스인 User와의 직접적인 @ManyToOne 관계를 제거합니다.
+ * 2. 대신, 어떤 사용자의 주문인지를 식별하기 위해 사용자의 ID(userId)만 Long 타입으로 저장합니다.
+ * 3. Product는 아직 같은 서비스 내에 있으므로 @ManyToOne 관계를 유지합니다.
  */
-//'order'는 SQL에서 정렬을 의미하는 예약어(ORDER BY)이므로, 테이블 이름을 'orders'로 지정해야 안전합니다.
 @Table(name = "orders")
 @Entity
-class Order (
+class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    //주문 상태(예약완료, 취소 등)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var status: OrderStatus,
 
-    //이 주문이 어떤 사용자에 의해 생성되었는지를 나타냄
-    //Order(N) : User(1) 관계
-    @ManyToOne(fetch = FetchType.LAZY)
-    //데이터베이스의 외래 키 컬럼을 'user_id'로 지정합니다.
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    // User Entity 참조를 userId(Long)으로 변경
+    @Column(name = "user_id", nullable = false)
+    val userId: Long,
 
-    //이 주문이 어떤 상품에 대한 것인지를 나타냄
-    //Order(N) : Product(1) 관계
+    // Product는 아직 같은 서비스(ticketing-poc)에 있으므로 관계 유지
     @ManyToOne(fetch = FetchType.LAZY)
-    //데이터베이스의 외래 키 컬럼을 'product_id'로 지정합니다.
     @JoinColumn(name = "product_id", nullable = false)
     val product: Product
-) : BaseEntity()
+
+) : BaseEntity() // 새로 만든 BaseEntity 상속
