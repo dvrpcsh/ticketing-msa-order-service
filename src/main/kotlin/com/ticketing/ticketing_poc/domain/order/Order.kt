@@ -1,7 +1,6 @@
 package com.ticketing.ticketing_poc.domain.order
 
 import com.ticketing.ticketing_poc.domain.common.BaseEntity
-import com.ticketing.ticketing_poc.domain.product.Product
 import jakarta.persistence.*
 
 /**
@@ -9,7 +8,6 @@ import jakarta.persistence.*
  * 흐름:
  * 1. 다른 마이크로서비스인 User와의 직접적인 @ManyToOne 관계를 제거합니다.
  * 2. 대신, 어떤 사용자의 주문인지를 식별하기 위해 사용자의 ID(userId)만 Long 타입으로 저장합니다.
- * 3. Product는 아직 같은 서비스 내에 있으므로 @ManyToOne 관계를 유지합니다.
  */
 @Table(name = "orders")
 @Entity
@@ -26,9 +24,8 @@ class Order(
     @Column(name = "user_id", nullable = false)
     val userId: Long,
 
-    // Product는 아직 같은 서비스(ticketing-poc)에 있으므로 관계 유지
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Product Entity 참조를 productId(Long)으로 변경
     @JoinColumn(name = "product_id", nullable = false)
-    val product: Product
+    val productId: Long
 
 ) : BaseEntity() // 새로 만든 BaseEntity 상속

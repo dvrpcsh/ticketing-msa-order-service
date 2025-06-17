@@ -2,8 +2,6 @@ package com.ticketing.ticketing_poc.domain.order
 
 import com.ticketing.ticketing_poc.domain.order.dto.CreateOrderRequest
 import com.ticketing.ticketing_poc.domain.order.dto.OrderResponse
-import com.ticketing.ticketing_poc.domain.product.ProductRepository
-import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,26 +10,22 @@ import org.springframework.transaction.annotation.Transactional
  */
 @Service
 class OrderService (
-    private val orderRepository: OrderRepository,
-    private val productRepository: ProductRepository
+    private val orderRepository: OrderRepository
 ) {
     /**
      * 신규 주문 생성
      *
-     * 1.요청으로 돌어온 productId로 Product Entity만 DB에서 조회합니다.
-     * 2.요청으로 들어온 userId 값과 조회된 Product 정보를 바탕으로 Order Entity를 생성합니다.
+     * 1.요청으로 들어온 userId와 productId 값을 그대로 신뢰하고 사용합니다.
+     * 2.위 ID들을 사용하여 새로운 Order Entity를 생성합니다.
      * 3.생성된 Order를 DB에 저장하고, 저장된 정보를 DTO로 변환하여 반환합니다.
      */
     @Transactional
     fun createOrder(request: CreateOrderRequest): OrderResponse {
-        //1.요청으로 돌어온 productId로 Product Entity만 DB에서 조회합니다.
-        var product = productRepository.findById(request.productId)
-            .orElseThrow { EntityNotFoundException("해당 ID의 상품을 찾을 수 없습니다: ${request.productId}") }
 
-        //2.요청으로 들어온 userId 값과 조회된 Product 정보를 바탕으로 Order Entity를 생성합니다.
+        //1.요청으로 들어온 userId 값과 조회된 ProductID를 바탕으로 Order Entity를 생성합니다.
         val order = Order(
             userId = request.userId, //User객체 대신 userId를 직접 사용
-            product = product,
+            productId = request.productId,
             status = OrderStatus.RESERVED
         )
 
