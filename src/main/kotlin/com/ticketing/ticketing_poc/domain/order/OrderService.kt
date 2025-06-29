@@ -3,6 +3,7 @@ package com.ticketing.ticketing_poc.domain.order
 import com.ticketing.ticketing_poc.domain.order.dto.CreateOrderRequest
 import com.ticketing.ticketing_poc.domain.order.dto.OrderResponse
 import com.ticketing.ticketing_poc.kafka.OrderKafkaProducer
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -28,7 +29,7 @@ class OrderService (
         val order = Order(
             userId = request.userId,
             productId = request.productId,
-            status = OrderStatus.RESERVED
+            status = OrderStatus.PENDING_FOR_PAYMENT
         )
 
         //1-1.생성된 Order를 DB에 저장합니다.
@@ -45,4 +46,19 @@ class OrderService (
         return OrderResponse.from(savedOrder)
 
     }
+
+    /**
+     * 결제가 완료된 주문의 상태를 'RESERVED'(예약 확정)로 변경합니다.
+     *
+     * 1.Kafka로부터 전달받은 orderId로 주문을 조회합니다. 없으면 예외 발생
+     * 2.조회된 주문의 상태를 RESERVED로 변경합니다.(JPA의 더티 체킹(Dirty Cheking)에 의해 트랜잭션이 끝나면 자동으로 DB에 업데이트)
+     */
+    @Transactional
+    fun updateOrderStatusToReserved(orderId: Long) {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow() { EntityNotFoundException("주문(ID: $orderId)을 찾을 수 없습니다.")}
+
+        order.status = OrderStatus.RESERVED
+    }
+
 }

@@ -23,8 +23,8 @@ class PaymentKafkaConsumer (
         logger.info("'결제 완료'메시지를 수신했습니다. 주문 상태 업데이트를 시작합니다.")
 
         if(message.success) {
-            //TODO: 주문 서비스에 상태 업데이트 로직 호출
-            //orderService.updateOrderStatusToReserved(message.orderId)
+            //주문 서비스에 상태 업데이트 로직 호출
+            orderService.updateOrderStatusToReserved(message.orderId)
             logger.info("주문(ID: ${message.orderId}) 상태를 '예약 확정'으로 변경해야 합니다.")
         } else {
             //TODO: 결제 실패 시 주문 취소 등 예외 처리 로직
