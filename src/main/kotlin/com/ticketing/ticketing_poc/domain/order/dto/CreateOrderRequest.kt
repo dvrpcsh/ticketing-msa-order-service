@@ -11,5 +11,8 @@ data class CreateOrderRequest(
     val userId: Long,
 
     @Schema(description = "주문할 상품의 ID", example = "1")
-    val productId: Long
+    val productId: Long,
+
+    @Schema(description = "주문하는 좌석의 고유 ID (예: A-1-15)", example = "A-1-15")
+    val seatId: String
 )

@@ -26,6 +26,9 @@ class Order(
 
     // Product Entity 참조를 productId(Long)으로 변경
     @JoinColumn(name = "product_id", nullable = false)
-    val productId: Long
+    val productId: Long,
+
+    @Column(nullable = false)
+    val seatId: String
 
 ) : BaseEntity() // 새로 만든 BaseEntity 상속

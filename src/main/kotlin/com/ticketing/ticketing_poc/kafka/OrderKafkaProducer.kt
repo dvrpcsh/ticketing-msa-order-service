@@ -14,7 +14,7 @@ class OrderKafkaProducer (
     private val kafkaTemplate: KafkaTemplate<String, OrderCreationMessage>
 ) {
     //메시지를 보낼 토픽(주제)의 이름을 상수로 정의합니다.
-    private val TOPIC_NAME = "order-created"
+    private val TOPIC_NAME = "order-created-v2"
 
     /**
      * '주문 생성' 메시지를 Kafka로 전송합니다.
@@ -23,11 +23,12 @@ class OrderKafkaProducer (
      * 1.전송할 메시지 객체(OrderCreationMessage)를 생성합니다.
      * 2.kafkaTemplate.send()메서드를 사용하여 지정된 토픽으로 메시지를 보냅니다.
      */
-    fun sendOrderCreationMessage(orderId: Long, userId: Long, productId: Long) {
+    fun sendOrderCreationMessage(orderId: Long, userId: Long, productId: Long, seatId: String) {
         val message = OrderCreationMessage(
             orderId = orderId,
             userId = userId,
-            productId = productId
+            productId = productId,
+            seatId = seatId
         )
         kafkaTemplate.send(TOPIC_NAME, message)
     }

@@ -6,5 +6,6 @@ package com.ticketing.ticketing_poc.domain.order.dto
 data class OrderCreationMessage (
     val orderId: Long,
     val userId: Long,
-    val productId: Long
+    val productId: Long,
+    val seatId: String
 )

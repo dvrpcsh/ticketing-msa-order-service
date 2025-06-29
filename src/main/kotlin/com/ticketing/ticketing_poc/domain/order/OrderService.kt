@@ -29,6 +29,7 @@ class OrderService (
         val order = Order(
             userId = request.userId,
             productId = request.productId,
+            seatId = request.seatId,
             status = OrderStatus.PENDING_FOR_PAYMENT
         )
 
@@ -39,7 +40,8 @@ class OrderService (
         kafkaProducer.sendOrderCreationMessage(
             orderId =  savedOrder.id!!,
             userId =  savedOrder.userId,
-            productId = savedOrder.productId
+            productId = savedOrder.productId,
+            seatId = savedOrder.seatId
         )
 
         //4.저장된 Order 정보를 바탕으로 OrderResponseDto를 생성하여 반환합니다.
