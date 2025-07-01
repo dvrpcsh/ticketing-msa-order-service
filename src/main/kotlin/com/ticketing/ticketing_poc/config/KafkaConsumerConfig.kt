@@ -18,7 +18,7 @@ class KafkaConsumerConfig {
     @Bean
     fun consumerFactory(): ConsumerFactory<String, Any> {
         val props = mutableMapOf<String, Any>()
-        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "kafka:9092"
         props[ConsumerConfig.GROUP_ID_CONFIG] = "order-group"
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
