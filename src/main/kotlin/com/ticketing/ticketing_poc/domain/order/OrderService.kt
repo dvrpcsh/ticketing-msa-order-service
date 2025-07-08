@@ -63,4 +63,15 @@ class OrderService (
         order.status = OrderStatus.RESERVED
     }
 
+    /**
+     * 결제 실패 시 주문 상태를 'CANCELED'로 변경합니다.
+     */
+    @Transactional
+    fun cancelOrderForPaymentFailure(orderId: Long) {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { EntityNotFoundException("주문(ID: $orderId)을 찾을 수 없습니다.")}
+
+        order.status = OrderStatus.CANCELED
+    }
+
 }

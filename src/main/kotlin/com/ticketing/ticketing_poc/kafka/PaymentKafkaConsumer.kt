@@ -27,8 +27,10 @@ class PaymentKafkaConsumer (
             orderService.updateOrderStatusToReserved(message.orderId)
             logger.info("주문(ID: ${message.orderId}) 상태를 '예약 확정'으로 변경해야 합니다.")
         } else {
-            //TODO: 결제 실패 시 주문 취소 등 예외 처리 로직
+            //결제 실패 시 주문 취소 등 예외 처리 로직
             logger.warn("결제 실패 메시지 수신: 주문(ID: ${message.orderId}), 사유:${message.reason}")
+            orderService.cancelOrderForPaymentFailure(message.orderId)
+            logger.info("주문(ID: ${message.orderId}) 상태가 '취소'로 성공적으로 변경되었습니다.")
         }
     }
 }
