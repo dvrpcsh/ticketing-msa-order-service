@@ -74,4 +74,42 @@ class OrderService (
         order.status = OrderStatus.CANCELED
     }
 
+    /**
+     * 특정 사용자의 모든 주문 내역을 조회합니다.
+     *
+     * 1.전달받은 userId를 사용하여 해당 사용자의 모든 주문을 DB에서 조회합니다.
+     * 2.조회된 주문 Entity 목록을 OrderResponse DTO 목록을 변환하여 반환합니다.
+     */
+    @Transactional(readOnly = true)
+    fun getMyOrders(userId: Long): List<OrderResponse> {
+        return orderRepository.findByUserIdOrderByIdDesc(userId)
+            .map { OrderResponse.from(it) }
+    }
+
+    /**
+     * 특정 주문을 취소합니다.
+     *
+     * 1.orderId로 주문을 조회하고 요청한 userId가 실제 주문한 사용자가 맞는지 확인합니다.
+     * 2.주문 상태를 CANCELED로 변경합니다.
+     * 3.'주문 취소' 메시지를 Kafka로 발행하여, 좌석 서비스가 후속 처리를 할 수 있도록 합니다.
+     */
+    @Transactional
+    fun cancelOrder(orderId: Long, userId: Long) {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow() { EntityNotFoundException("주문(ID: $orderId)을 찾을 수 없습니다.") }
+
+        if(order.userId != userId) {
+            throw IllegalArgumentException("주문을 취소할 권한이 없습니다.")
+        }
+
+        order.status = OrderStatus.CANCELED
+
+        //Kafka로 주문 취소 메시지 발행
+        kafkaProducer.sendOrderCancelMessage(
+            orderId = order.id!!,
+            productId = order.productId,
+            seatId =  order.seatId
+        )
+    }
+
 }
