@@ -34,7 +34,7 @@ class OrderController (
      */
     @Operation(summary = "내 주문 내역 목록 조회")
     @GetMapping
-    fun getMyOrders(@RequestParam userId: Long): ResponseEntity<List<OrderResponse>> {
+    fun getMyOrders(@RequestHeader("X-User-Id") userId: Long): ResponseEntity<List<OrderResponse>> {
         val orders = orderService.getMyOrders(userId)
 
         return ResponseEntity.ok(orders)
@@ -48,7 +48,7 @@ class OrderController (
     @DeleteMapping("/{orderId}")
     fun cancelOrder(
         @PathVariable orderId: Long,
-        @RequestParam userId: Long
+        @RequestHeader("X-User-Id") userId: Long
     ): ResponseEntity<String> {
         orderService.cancelOrder(orderId, userId)
 
